@@ -38,7 +38,7 @@ public class LeapRecorder : MonoBehaviour {
     protected Frame current_frame_ = new Frame();
 
     /** Creates a new LeapRecorder object. This doesn't make sense outside the context of a HandController object. */
-    void Awake() {
+    public LeapRecorder() {
         Reset();
         
     }
