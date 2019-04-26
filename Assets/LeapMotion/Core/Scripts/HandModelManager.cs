@@ -40,14 +40,17 @@ namespace Leap.Unity {
     protected bool physicsEnabled = true;
         ////LeapRecoderのインスタンスをこのHandControllerの代わりになるクラスに入れる。
         /** The object used to control recording and playback.*/
-        public LeapRecorder recorder_;
+        protected LeapRecorder recorder_;
+ 
         LeapServiceProvider leapController;
         protected Controller leap_controller_;
+        public LeapRecorder LeapRecorder;
 
+        public Controller controller;
         // Recording parameters.
         /** Set true to enable recording. */
         [Space(8)]
-        public bool enableRecordPlayback = false;
+        bool enableRecordPlayback = true;
         /** The file to record or playback from. */
         public TextAsset recordingAsset;
         /** Playback speed. Set to 1.0 for normal speed. */
@@ -55,22 +58,51 @@ namespace Leap.Unity {
         /** Whether to loop the playback. */
         public bool recorderLoop = true;
 
+        /** The smoothed offset between the FixedUpdate timeline and the Leap timeline.  
+   * Used to provide temporally correct frames within FixedUpdate */
+        private SmoothedFloat smoothedFixedUpdateOffset_ = new SmoothedFloat();
+        /** The maximum offset calculated per frame */
+        private float perFrameFixedUpdateOffset_;
+        /** There always should be exactly one main HandController in the scene, which is reffered to by the HandController.Main getter. */
+        public bool isMain = true;
+
+        private Frame curr_image_frame = null;
+        private Frame curr_frame = null;
+        private int curr_frame_count = -1;
+
+        public delegate void LifecycleEventHandler(HandModelManager handController);
+        /* Called at the end of the MonoBehavior Start() function */
+        public event LifecycleEventHandler onStart;
+
         void Awake()
         {
-            recorder_ = new LeapRecorder();
+
+            recorder_ = gameObject.AddComponent<LeapRecorder>() as LeapRecorder;
+            recorder_.Reset();
+            Debug.Log(recorder_.speed);
+            //leap_controller_ = gameObject.AddComponent<Controller>() as GameObject;
+
            
-            //recorder_.LeapRecorder();
-            
+
         }
+
+        
+
+
         public LeapRecorder GetLeapRecorder()
         {
+          //  Debug.Log(recorder_.speed);
             if (recorder_ == null) Debug.Log("nullです");
+         
             return recorder_;
         }
         protected static List<HandModelManager> _mains = new List<HandModelManager>();
 
         /* The HandController.Main property returns an instance of a HandController with it's isMain property set
-         * to true.  If there are multiple main Hand Controllers this method will choose one in an undefined way.
+         *          * to true.  If there are multiple main Hand Controllers this method will choose one in an undefined way.
+         *          // HandController.Mainプロパティは、isMainプロパティが*に設定されたHandControllerのインスタンスを
+         *          // 返します。複数のメインハンドコントローラがある場合、このメソッドは未定義の方法で
+         *          // 1つを選択します。
          */
         public static HandModelManager Main
         {
@@ -78,11 +110,28 @@ namespace Leap.Unity {
             {
                 if (_mains.Count == 0)
                 {
+                    Debug.Log(_mains.Count);
                     Debug.LogWarning("Could not find an active main Hand Controller.  One may not exist, or may not have been enabled yet.");
                     return null;
                 }
+  
                 return _mains[0];
             }
+        }
+
+        protected static List<HandModelManager> _all = new List<HandModelManager>();
+
+        public Controller GetLeapController()
+        {
+#if UNITY_EDITOR
+            //Do a null check to deal with hot reloading
+            if (leap_controller_ == null)
+            {
+                leap_controller_ = new Controller();
+                
+            }
+#endif
+            return leap_controller_;
         }
 
         /** The current frame position divided by the total number of frames in the recording. */
@@ -133,17 +182,21 @@ namespace Leap.Unity {
         }
 
         /** Called in Update() to send frames to the recorder. */
+        //キーが押されたときに、AddFrameが呼び出される。
         protected void UpdateRecorder()
         {
+           
+            
             if (!enableRecordPlayback)
                 return;
-
+            Debug.Log("呼び出された");
             recorder_.speed = recorderSpeed;
             recorder_.loop = recorderLoop;
 
             if (recorder_.state == RecorderState.Recording)
             {
                 recorder_.AddFrame(leapController.GetLeapController().Frame());
+                Debug.Log("呼び出された？");
             }
             else if (recorder_.state == RecorderState.Playing)
             {
@@ -191,6 +244,70 @@ namespace Leap.Unity {
             {
                 UpdateHandRepresentations(physicsHandReps, ModelType.Physics, frame);
             }
+        }
+        public virtual Frame GetFrame()
+        {
+            if (enableRecordPlayback && (recorder_.state == RecorderState.Playing || recorder_.state == RecorderState.Paused))
+                return recorder_.GetCurrentFrame();
+
+            //ensureFramesUpToDate();
+            return curr_frame;
+        }
+
+
+        /* Returns the latest frame object. 
+         *  * 
+         *   * This method returns a frame object that contains Image data.  It is the users responsibility to make sure
+         *    * they dispose any objects they obtain from this frame, since it is linked to the images and could result
+         *     * in large memory increase if they are not disposed of properly.  
+         *      * 
+         *       * If the recorder object is playing a recording, then this method will return null.
+         *       // 最新のフレームオブジェクトを返します。 * *このメソッドは画像データを含むフレームオ
+         *       // ブジェクトを返します。これは画像にリンクされているため、このフレームから取得した
+         *       // オブジェクトを確実に破棄し、適切に破棄しないとメモリが大幅に増加する可能性があり
+         *       // ます。 * *レコーダーオブジェクトがレコーディングを再生している場合、このメソッドは
+         *       // nullを返します。
+ */
+        public virtual Frame GetImageFrame()
+        {
+            if (enableRecordPlayback && (recorder_.state == RecorderState.Playing || recorder_.state == RecorderState.Paused))
+                return null;
+
+            //ensureFramesUpToDate();
+            return curr_image_frame;
+        }
+
+        protected virtual void ensureFramesUpToDate()
+        {
+            //Ensure that we update curr_frame every Update cycle.  curr_frame stays the same until the next Update.
+            if (curr_frame == null || curr_image_frame == null || Time.frameCount != curr_frame_count)
+            {
+                if (curr_image_frame != null)
+                {
+               //     curr_image_frame.Dispose();
+                    curr_image_frame = null;
+                }
+
+                curr_image_frame = GetLeapController().Frame();
+             //   curr_frame = GetImagelessFrame(curr_image_frame, false);
+                curr_frame_count = Time.frameCount;
+            }
+        }
+
+
+
+        protected virtual void Update()
+        {
+            if (recorder_ == null)
+            {
+                print("nullです");
+            }
+          //  else Debug.Log("nullでない");
+
+
+
+            UpdateRecorder();
+            Frame frame = GetFrame();
         }
 
         /** 
@@ -415,7 +532,12 @@ namespace Leap.Unity {
     #region Unity Events
 
     protected virtual void OnEnable() {
-      if (_leapProvider == null) {
+            if (isMain)
+            {
+                _mains.Add(this);
+            }
+            _all.Add(this);
+            if (_leapProvider == null) {
         _leapProvider = Hands.Provider;
       }
 
@@ -433,7 +555,15 @@ namespace Leap.Unity {
 
     /** Popuates the ModelPool with the contents of the ModelCollection */
     void Start() {
-      for(int i=0; i<ModelPool.Count; i++) {
+            //if (enableRecordPlayback && recordingAsset != null)
+            //    recorder_.Load(recordingAsset);
+
+            //LifecycleEventHandler handler = onStart;
+            //if (handler != null)
+            //{
+            //    handler(this);
+            //}
+            for (int i=0; i<ModelPool.Count; i++) {
         InitializeModelGroup(ModelPool[i]);
       }
     }

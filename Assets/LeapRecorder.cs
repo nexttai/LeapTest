@@ -24,7 +24,7 @@ public enum RecorderState {
 /**
  * Maintains a buffer of recorded frames and tracks the state of playback and recording.
  */
-public class LeapRecorder : MonoBehaviour {
+public class LeapRecorder :MonoBehaviour{
 
     /** Playback speed. */
     public float speed = 1.0f;
@@ -38,11 +38,16 @@ public class LeapRecorder : MonoBehaviour {
     protected Frame current_frame_ = new Frame();
 
     /** Creates a new LeapRecorder object. This doesn't make sense outside the context of a HandController object. */
-    public LeapRecorder() {
-        Reset();
-        
-    }
+    //public LeapRecorder()
+    //{
+    //    Debug.Log("毎回呼び出されている?");
+    //    Reset();
 
+    //}
+
+
+
+   
     /** Sets the play state to stopped. Also resets the frame index to 0. */
     public void Stop() {
         state = RecorderState.Stopped;
@@ -66,12 +71,14 @@ public class LeapRecorder : MonoBehaviour {
 
     /** Discards any recorded frames. */
     public void Reset() {
+       
         frames_ = new List<byte[]>();
         frame_index_ = 0;
         if (frames_ != null)
         {
             Debug.Log("frames_入ってる");
         }
+       
         
         
     }
@@ -120,6 +127,7 @@ public class LeapRecorder : MonoBehaviour {
     /** Advances the playhead, deserializes the frame, and returns it.*/
     public Frame NextFrame() {
         current_frame_ = new Frame();
+
         if (frames_.Count > 0) {
             if (frame_index_ >= frames_.Count && loop) {
                 frame_index_ -= frames_.Count;
@@ -127,7 +135,14 @@ public class LeapRecorder : MonoBehaviour {
                 frame_index_ += frames_.Count;
             }
             if (frame_index_ < frames_.Count && frame_index_ >= 0) {
-                current_frame_.Deserialize(frames_[(int)frame_index_]);
+                List<Frame> nextFrame=frames_[(int)frame_index_].Deserialize<List<Frame>>();
+                foreach(Frame deFrame in nextFrame)
+                {
+                    current_frame_ = deFrame;
+                }
+                    
+                
+               // current_frame_.Deserialize(frames_[(int)frame_index_]);
                 frame_index_ += speed;
             }
         }
@@ -144,9 +159,9 @@ public class LeapRecorder : MonoBehaviour {
             foreach (byte[] frameGet in frames_) {
                 
                 List<Frame> hoge=frameGet.Deserialize<List<Frame>>();
-                foreach (Frame frame in hoge)
+                foreach (Frame preframe in hoge)
                 {
-                    frames.Add(frame);
+                    frames.Add(preframe);
                 
                 }
             }

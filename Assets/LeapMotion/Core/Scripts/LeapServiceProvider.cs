@@ -142,7 +142,9 @@ namespace Leap.Unity
                     {
                         value(device);
                     }
+                    Debug.Log("ê⁄ë±ÇµÇΩ");
                 }
+                else Debug.Log("ê⁄ë±ÇµÇƒÇ»Ç¢ÅH");
                 _onDeviceSafe += value;
             }
             remove
@@ -467,6 +469,7 @@ namespace Leap.Unity
         /// </summary>
         public bool IsConnected()
         {
+            Debug.Log("ê⁄ë±Ç≥ÇÍÇΩ");
             return GetLeapController().IsConnected;
         }
 
