@@ -9,5 +9,6 @@ public class Exercise :MonoBehaviour
     public Sprite[] teacherFrames;
     public TextAsset recording;
     public float score;
-    public Object FontObject;
+    public GameObject FontObject;
+    public AudioSource audio;
 }

@@ -28,7 +28,8 @@ public class LeapRecorder :MonoBehaviour{
 
     /** Playback speed. */
     public float speed = 1.0f;
-    /** Whether to lop back to the beginning when the last recorded frame is played.*/
+    /** Whether to lop back to the beginning when the last recorded frame is played.
+     // 最後に記録されたフレームが再生されたときに先頭に戻るかどうか。*/
     public bool loop = true;
     /** The current play state. */
     public RecorderState state = RecorderState.Playing;
@@ -70,7 +71,7 @@ public class LeapRecorder :MonoBehaviour{
     }
 
     /** Discards any recorded frames. */
-    public void Reset() {
+    public void Resets() {
        
         frames_ = new List<byte[]>();
         frame_index_ = 0;
@@ -111,12 +112,17 @@ public class LeapRecorder :MonoBehaviour{
         }
     }
 
-    /** Serializes a Leap Frame object and adds it to the end of the recording. */
+    /** Serializes a Leap Frame object and adds it to the end of the recording.
+     * // Leap Frameオブジェクトをシリアル化し、それを記録の最後に追加します。*/
     public void AddFrame(Frame frame) {
-
-        object t = frame;
+        
+        
             
-        frames_.Add(t.SerializeToByteArray());
+        frames_.Add(frame.SerializeToByteArray());
+
+        Frame deserializedFrame = frames_[0].Deserialize<Frame>();
+        Debug.Log(deserializedFrame.CurrentFramesPerSecond);
+
     }
 
     /** Returns the current frame without advancing the playhead. This frame could be invalid. */
@@ -125,24 +131,54 @@ public class LeapRecorder :MonoBehaviour{
     }
 
     /** Advances the playhead, deserializes the frame, and returns it.*/
-    public Frame NextFrame() {
-        current_frame_ = new Frame();
 
-        if (frames_.Count > 0) {
-            if (frame_index_ >= frames_.Count && loop) {
+
+    //public Frame NextFrame()
+    //{
+    //    current_frame_ = new Frame();
+
+    //    if (frames_.Count > 0)
+    //    {
+    //        if (frame_index_ >= frames_.Count && loop)
+    //        {
+    //            frame_index_ -= frames_.Count;
+    //        }
+    //        else if (frame_index_ < 0 && loop)
+    //        {
+    //            frame_index_ += frames_.Count;
+    //        }
+    //        if (frame_index_ < frames_.Count && frame_index_ >= 0)
+    //        {
+    //            List<Frame> nextFrame = frames_[(int)frame_index_].Deserialize<List<Frame>>();
+
+    //            foreach (Frame deFrame in nextFrame)
+    //            {
+    //                current_frame_ = deFrame;
+    //            }
+
+
+    //            // current_frame_.Deserialize(frames_[(int)frame_index_]);
+    //            frame_index_ += speed;
+    //        }
+    //    }
+    //    return current_frame_;
+    //}
+    public Frame NextFrame()
+    {
+        current_frame_ = new Frame();
+        if (frames_.Count > 0)
+        {
+            if (frame_index_ >= frames_.Count && loop)
+            {
                 frame_index_ -= frames_.Count;
-            } else if (frame_index_ < 0 && loop) {
+            }
+            else if (frame_index_ < 0 && loop)
+            {
                 frame_index_ += frames_.Count;
             }
-            if (frame_index_ < frames_.Count && frame_index_ >= 0) {
-                List<Frame> nextFrame=frames_[(int)frame_index_].Deserialize<List<Frame>>();
-                foreach(Frame deFrame in nextFrame)
-                {
-                    current_frame_ = deFrame;
-                }
-                    
-                
-               // current_frame_.Deserialize(frames_[(int)frame_index_]);
+            if (frame_index_ < frames_.Count && frame_index_ >= 0)
+            {
+                current_frame_ = frames_[(int)frame_index_].Deserialize<Frame>();
                 frame_index_ += speed;
             }
         }
@@ -152,25 +188,37 @@ public class LeapRecorder :MonoBehaviour{
     /** Deserializes all the recorded frames and returns them in a new list. */
     //今回、すべてのframeの記録をデシリアライズして、byteファイルにした後、新しいリストのframesを作る。
     //そこで、framesに入れたいものはバイト型の配列のframes_をデシリアライズしたframe型のframeを追加。
-    public List<Frame> GetFrames() {
-        List<Frame> frames = new List<Frame>();
-        for (int i = 0; i < frames_.Count; ++i) {
-           
-            foreach (byte[] frameGet in frames_) {
-                
-                List<Frame> hoge=frameGet.Deserialize<List<Frame>>();
-                foreach (Frame preframe in hoge)
-                {
-                    frames.Add(preframe);
-                
-                }
-            }
+    //public List<Frame> GetFrames() {
+    //    List<Frame> frames = new List<Frame>();
+    //    for (int i = 0; i < frames_.Count; ++i) {
 
-            
+    //        foreach (byte[] frameGet in frames_) {
+
+    //            List<Frame> hoge=frameGet.Deserialize<List<Frame>>();
+    //            foreach (Frame preframe in hoge)
+    //            {
+    //                frames.Add(preframe);
+
+    //            }
+    //        }
+
+
+    //    }
+    //    return frames;
+    //}
+
+        //byte型の元のデータをFrame型に変える。
+    public List<Frame> GetFrames()
+    {
+        List<Frame> frames = new List<Frame>();
+        for (int i = 0; i < frames_.Count; ++i)
+        {
+            Frame frame = new Frame();
+            frame = frames_[(int)frame_index_].Deserialize<Frame>();
+            frames.Add(frame);
         }
         return frames;
     }
-
     /** The number of recorded frames. */
     public int GetFramesCount() {
         return frames_.Count;
@@ -206,11 +254,13 @@ public class LeapRecorder :MonoBehaviour{
     }
 
     /** Loads saved frames from a file. */
+    
     public void Load(TextAsset text_asset) {
         Load(text_asset.bytes);
     }
 
     /** Loads saved frames from byte array. */
+    //frames_にすべてのdataの情報を格納する。リスト化しただけ。
     public void Load(byte[] data) {
         frame_index_ = 0;
         if (frames_ == null)
@@ -221,11 +271,16 @@ public class LeapRecorder :MonoBehaviour{
         int i = 0;
         while (i < data.Length) {
             byte[] frame_size = new byte[4];
+            //バイト型の４つの要素にdataをコピー
             Array.Copy(data, i, frame_size, 0, frame_size.Length);
             i += frame_size.Length;
+            //先ほどのdataをコピーされたframe_sizeを32ビット型に変換したものをframeに入れる。
             byte[] frame = new byte[System.BitConverter.ToUInt32(frame_size, 0)];
+            //dataをframeにframe.Length分(3562?)個文、入れる。リストの要素である
             Array.Copy(data, i, frame, 0, frame.Length);
+            //iにコピーした数を入れる。
             i += frame.Length;
+            //リスト型のframes_にframeを加える。
             frames_.Add(frame);
         }
     }

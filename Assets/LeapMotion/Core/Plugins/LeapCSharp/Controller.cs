@@ -484,21 +484,32 @@ namespace Leap {
 
     /// <summary>
     /// In most cases you should get Frame objects using the LeapProvider.CurrentFrame
-    /// property. The data in Frame objects taken directly from a Leap.Controller instance
-    /// is still in the Leap Motion frame of reference and will not match the hands
-    /// displayed in a Unity scene.
-    /// 
-    /// Returns a frame of tracking data from the Leap Motion software. Use the optional
-    /// history parameter to specify which frame to retrieve. Call frame() or
-    /// frame(0) to access the most recent frame; call frame(1) to access the
-    /// previous frame, and so on. If you use a history value greater than the
-    /// number of stored frames, then the controller returns an empty frame.
-    /// 
-    /// @param history The age of the frame to return, counting backwards from
-    /// the most recent frame (0) into the past and up to the maximum age (59).
-    /// @returns The specified frame; or, if no history parameter is specified,
-    /// the newest frame. If a frame is not available at the specified history
-    /// position, an invalid Frame is returned.
+    ///     /// property. The data in Frame objects taken directly from a Leap.Controller instance
+    ///         /// is still in the Leap Motion frame of reference and will not match the hands
+    ///             /// displayed in a Unity scene.
+    ///                 /// 
+    ///                     /// Returns a frame of tracking data from the Leap Motion software. Use the optional
+    ///                         /// history parameter to specify which frame to retrieve. Call frame() or
+    ///                             /// frame(0) to access the most recent frame; call frame(1) to access the
+    ///                                 /// previous frame, and so on. If you use a history value greater than the
+    ///                                     /// number of stored frames, then the controller returns an empty frame.
+    ///                                         /// 
+    ///                                             /// @param history The age of the frame to return, counting backwards from
+    ///                                                 /// the most recent frame (0) into the past and up to the maximum age (59).
+    ///                                                     /// @returns The specified frame; or, if no history parameter is specified,
+    ///                                                         /// the newest frame. If a frame is not available at the specified history
+    ///                                                             /// position, an invalid Frame is returned.
+    ///                                                             // ほとんどの場合、LeapProvider.CurrentFrameプロパティを使ってFrameオブジェクトを取得する必要
+    ///                                                             // があります。 Leap.Controllerインスタンスから直接取得したFrameオブジェクトのデータは、ま
+    ///                                                             // だLeap Motionの参照フレーム内にあり、Unityシーンに表示されている針とは一致しません。 L
+    ///                                                             // eap Motionソフトウェアからトラッキングデータのフレームを返します。取得するフレームを
+    ///                                                             // 指定するには、オプションのhistoryパラメータを使用します。最新のフレームにアクセスす
+    ///                                                             // るには、frame（）またはframe（0）を呼び出します。前のフレームにアクセスするには、fram
+    ///                                                             // e（1）を呼び出します。保存されているフレーム数よりも大きい履歴値を使用した場合、コ
+    ///                                                             // ントローラは空のフレームを返します。 @param history最新のフレーム（0）から過去に向かっ
+    ///                                                             // て最大年齢（59）までの逆数をカウントして戻る、フレームの経過日数。指定されたフレー
+    ///                                                             // ム。履歴パラメータが指定されていない場合は、最新のフレーム。指定された履歴位置で
+    ///                                                             // フレームが利用できない場合は、無効なフレームが返されます。
     /// @since 1.0
     /// </summary>
     public Frame Frame(int history = 0) {

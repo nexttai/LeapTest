@@ -42,7 +42,7 @@ namespace Leap.Unity {
         /** The object used to control recording and playback.*/
         protected LeapRecorder recorder_;
  
-        LeapServiceProvider leapController;
+        public LeapServiceProvider leapController;
         protected Controller leap_controller_;
         public LeapRecorder LeapRecorder;
 
@@ -78,7 +78,7 @@ namespace Leap.Unity {
         {
 
             recorder_ = gameObject.AddComponent<LeapRecorder>() as LeapRecorder;
-            recorder_.Reset();
+            recorder_.Resets();
             Debug.Log(recorder_.speed);
             //leap_controller_ = gameObject.AddComponent<Controller>() as GameObject;
 
@@ -172,7 +172,7 @@ namespace Leap.Unity {
         /** Discards any frames recorded so far. */
         public void ResetRecording()
         {
-            recorder_.Reset();
+            recorder_.Resets();
         }
 
         /** Starts saving frames. */
@@ -185,19 +185,19 @@ namespace Leap.Unity {
         //キーが押されたときに、AddFrameが呼び出される。
         protected void UpdateRecorder()
         {
-           
-            
+
+
             if (!enableRecordPlayback)
                 return;
-            Debug.Log("呼び出された");
+           // Debug.Log("呼び出された");
             recorder_.speed = recorderSpeed;
             recorder_.loop = recorderLoop;
 
             if (recorder_.state == RecorderState.Recording)
             {
-                recorder_.AddFrame(leapController.GetLeapController().Frame());
-                Debug.Log("呼び出された？");
-            }
+            recorder_.AddFrame(leapController.GetLeapController().Frame());
+            Debug.Log("呼び出された？");
+        }
             else if (recorder_.state == RecorderState.Playing)
             {
                 recorder_.NextFrame();

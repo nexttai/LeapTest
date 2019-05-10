@@ -28,14 +28,18 @@ namespace Leap {
 
     /// <summary>
     /// Constructs a Frame object.
-    /// 
-    /// Frame instances created with this constructor are invalid.
-    /// Get valid Frame objects by calling the Controller.Frame() function.
-    /// 
-    /// The only time you should use this constructor is before deserializing
-    /// serialized frame data, or if you are going to be passing this Frame
-    /// to a method that fills it with valid data.
-    /// 
+    ///     /// 
+    ///         /// Frame instances created with this constructor are invalid.
+    ///             /// Get valid Frame objects by calling the Controller.Frame() function.
+    ///                 /// 
+    ///                     /// The only time you should use this constructor is before deserializing
+    ///                         /// serialized frame data, or if you are going to be passing this Frame
+    ///                             /// to a method that fills it with valid data.
+    ///                                 /// 
+    ///                                 // Frameオブジェクトを構築します。このコンストラクタで作成されたフレームインスタンスは
+    ///                                 // 無効です。 Controller.Frame（）関数を呼び出して有効なFrameオブジェクトを取得します。この
+    ///                                 // コンストラクタを使用するのは、シリアル化されたフレームデータを逆シリアル化する前
+    ///                                 // 、またはこのFrameを有効なデータで埋めるメソッドに渡す場合だけです。
     /// @since 1.0
     /// </summary>
     public Frame() {

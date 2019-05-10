@@ -154,7 +154,9 @@ namespace Leap {
 
     /// <summary>
     /// The list of Finger objects detected in this frame that are attached to
-    /// this hand, given in order from thumb to pinky.  The list cannot be empty.
+    ///     /// this hand, given in order from thumb to pinky.  The list cannot be empty.
+    ///     // この手に付いている、このフレームで検出されたFingerオブジェクトのリスト。親指から小
+    ///     // 指の順で並べられています。リストを空にすることはできません。
     /// @since 1.0
     /// </summary>
     public List<Finger> Fingers;

@@ -16,8 +16,11 @@ namespace Leap.Unity {
 
   /// <summary>
   /// Provides Frame object data to the Unity application by firing events as soon
-  /// as Frame data is available. Frames contain all currently tracked Hands in view
-  /// of the Leap Motion Controller.
+  ///   /// as Frame data is available. Frames contain all currently tracked Hands in view
+  ///     /// of the Leap Motion Controller.
+  ///     // フレームデータが利用可能になるとすぐにイベントを発生させることによって、Unityアプリ
+  ///     // ケーションにフレームオブジェクトデータを提供します。フレームには、Leap Motion Controlle
+  ///     // rから見て現在追跡されているすべての手が含まれています。
   /// </summary>
   public abstract class LeapProvider : MonoBehaviour {
 
@@ -28,11 +31,15 @@ namespace Leap.Unity {
 
     /// <summary>
     /// The current frame for this update cycle, in world space. 
-    /// 
-    /// IMPORTANT!  This frame might be mutable!  If you hold onto a reference
-    /// to this frame, or a reference to any object that is a part of this frame,
-    /// it might change unexpectedly.  If you want to save a reference, make sure
-    /// to make a copy.
+    ///     /// 
+    ///         /// IMPORTANT!  This frame might be mutable!  If you hold onto a reference
+    ///             /// to this frame, or a reference to any object that is a part of this frame,
+    ///                 /// it might change unexpectedly.  If you want to save a reference, make sure
+    ///                     /// to make a copy.
+    ///                     // ワールド空間におけるこの更新サイクルの現在のフレーム。重要！このフレームは変更可
+    ///                     // 能かもしれません！このフレームへの参照、またはこのフレームの一部であるオブジェク
+    ///                     // トへの参照を保持していると、予想外に変化する可能性があります。参照を保存したい場
+    ///                     // 合は、必ずコピーを作成してください。
     /// </summary>
     public abstract Frame CurrentFrame { get; }
 
